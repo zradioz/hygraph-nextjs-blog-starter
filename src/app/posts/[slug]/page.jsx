@@ -3,39 +3,26 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { RichText } from '@graphcms/rich-text-react-renderer'
-import { cookies,draftMode } from 'next/headers'
+import { draftMode } from 'next/headers'
+import {client} from '@/utils/client'
 
 async function getPosts() {
 
-  const allPosts = await fetch(process.env.HYGRAPH_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: AllPosts
-    })
-  }).then((res) => res.json())
+  const allPosts = await client.request(AllPosts)
 
-  return allPosts.data.posts
+  return allPosts.posts
 }
 
 
 
 async function getData(slug) {
   const { isEnabled } = draftMode()
-  const { post } = await fetch((process.env.HYGRAPH_ENDPOINT), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: SinglePost,
-      variables: { slug: slug, stage: isEnabled ? 'DRAFT' : 'PUBLISHED' }
-    })
-  })
-    .then((res) => res.json())
-    .then((res) => res.data)
+
+  const variables = { slug: slug }
+
+  if (isEnabled) client.setHeader('Authorization', `Bearer ${process.env.HYGRAPH_PREVIEW_TOKEN}`)
+
+  const { post } = await client.request(SinglePost, variables)  
   return post
 }
 

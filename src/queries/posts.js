@@ -11,8 +11,8 @@ const AllPosts = `
 `
 
 const SinglePost = `
-  query SinglePost($slug: String!, $stage: Stage!) {
-    post(where: { slug: $slug }, stage: $stage) {
+  query SinglePost($slug: String!) {
+    post(where: { slug: $slug }) {
       createdAt
       updatedAt
       publishedAt

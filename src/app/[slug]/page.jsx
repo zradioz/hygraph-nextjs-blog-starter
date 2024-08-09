@@ -2,22 +2,15 @@ import { SinglePage } from '@/queries/pages'
 import { RichText } from '@graphcms/rich-text-react-renderer'
 import { notFound } from 'next/navigation'
 import { draftMode } from 'next/headers'
+import { client } from '@/utils/client'
 
 async function getPage(slug) {
   const { isEnabled } = draftMode()
+  if (isEnabled) client.setHeader('Authorization', `Bearer ${process.env.HYGRAPH_PREVIEW_TOKEN}`)
+  
+  const variables = { slug: slug }
 
-  const { page } = await fetch(process.env.HYGRAPH_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: SinglePage,
-      variables: { slug: slug, stage: isEnabled ? 'DRAFT' : 'PUBLISHED' }
-    })
-  })
-    .then((res) => res.json())
-    .then((res) => res.data)
+  const { page } = await client.request(SinglePage, variables)
   return page
 }
 

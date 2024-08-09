@@ -1,18 +1,9 @@
 import { AllPosts } from '../queries/posts'
 import Link from 'next/link'
-
+import {client} from '@/utils/client'
 async function getPosts() {
-  const allPosts = await fetch(process.env.HYGRAPH_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: AllPosts
-    })
-  }).then((res) => res.json())
-
-  return allPosts.data.posts
+  const allPosts = await client.request(AllPosts)
+  return allPosts.posts
 }
 
 export const metadata = {
