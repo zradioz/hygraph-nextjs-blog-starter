@@ -1,26 +1,18 @@
-import { AllPosts, SinglePost } from '@/queries/posts'
+import { SinglePost } from '@/queries/posts'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { RichText } from '@graphcms/rich-text-react-renderer'
 import { draftMode } from 'next/headers'
-import {client} from '@/utils/client'
-
-async function getPosts() {
-
-  const allPosts = await client.request(AllPosts)
-
-  return allPosts.posts
-}
-
+import { HygraphClient } from '@/utils/client'
 
 
 async function getData(slug) {
   const { isEnabled } = draftMode()
+  const client = HygraphClient({preview: isEnabled})
 
   const variables = { slug: slug }
 
-  if (isEnabled) client.setHeader('Authorization', `Bearer ${process.env.HYGRAPH_PREVIEW_TOKEN}`)
 
   const { post } = await client.request(SinglePost, variables)  
   return post

@@ -2,11 +2,12 @@ import { SinglePage } from '@/queries/pages'
 import { RichText } from '@graphcms/rich-text-react-renderer'
 import { notFound } from 'next/navigation'
 import { draftMode } from 'next/headers'
-import { client } from '@/utils/client'
+import { HygraphClient } from '@/utils/client'
 
 async function getPage(slug) {
   const { isEnabled } = draftMode()
-  if (isEnabled) client.setHeader('Authorization', `Bearer ${process.env.HYGRAPH_PREVIEW_TOKEN}`)
+
+  const client = HygraphClient({preview: isEnabled})
   
   const variables = { slug: slug }
 
