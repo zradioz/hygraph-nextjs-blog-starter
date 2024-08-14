@@ -1,20 +1,17 @@
 import { SinglePage } from '@/queries/pages'
 import { RichText } from '@graphcms/rich-text-react-renderer'
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
+import { HygraphClient } from '@/utils/client'
 
 async function getPage(slug) {
-  const { page } = await fetch(process.env.HYGRAPH_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: SinglePage,
-      variables: { slug: slug }
-    })
-  })
-    .then((res) => res.json())
-    .then((res) => res.data)
+  const { isEnabled } = draftMode()
+
+  const client = HygraphClient({preview: isEnabled})
+  
+  const variables = { slug: slug }
+
+  const { page } = await client.request(SinglePage, variables)
   return page
 }
 
@@ -23,7 +20,7 @@ export async function generateMetadata({ params }) {
   if (!page) return notFound()
 
   return {
-    title: page?.seoOverride.title || page.title,
+    title: page?.seoOverride?.title || page.title,
     description: page.seo?.description || page.description,
     openGraph: {
       images: [

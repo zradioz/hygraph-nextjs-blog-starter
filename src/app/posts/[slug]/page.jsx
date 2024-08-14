@@ -1,41 +1,20 @@
-import { AllPosts, SinglePost } from '@/queries/posts'
+import { SinglePost } from '@/queries/posts'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { RichText } from '@graphcms/rich-text-react-renderer'
-import { cookies,draftMode } from 'next/headers'
-
-async function getPosts() {
-  const allPosts = await fetch(process.env.HYGRAPH_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: AllPosts
-    })
-  }).then((res) => res.json())
-
-  return allPosts.data.posts
-}
-
+import { draftMode } from 'next/headers'
+import { HygraphClient } from '@/utils/client'
 
 
 async function getData(slug) {
-  const cookieStore = cookies()
-  const apiUrl = cookieStore.get('apiUrl')?.value
-  const { post } = await fetch((apiUrl ? apiUrl : process.env.HYGRAPH_ENDPOINT), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: SinglePost,
-      variables: { slug: slug }
-    })
-  })
-    .then((res) => res.json())
-    .then((res) => res.data)
+  const { isEnabled } = draftMode()
+  const client = HygraphClient({preview: isEnabled})
+
+  const variables = { slug: slug }
+
+
+  const { post } = await client.request(SinglePost, variables)  
   return post
 }
 
